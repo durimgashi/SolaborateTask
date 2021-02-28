@@ -1,0 +1,93 @@
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebRTC</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <style type="text/css">
+
+      #video-chat-container {
+        width: 100%;
+        background-color: black;
+        padding: 1%;
+      }
+      #video-chat-container video {
+        border: 1px solid white;
+      }
+    </style>
+  </head>
+
+  <body style="padding: 1%">
+    <div style="display: flex;">
+      <div id="room-selection-container" class="centered" style="width: 50%; padding: 1%;">
+        <input id="room-input" type="hidden" />
+        <input id="room-input-id" type="hidden" />
+
+        <p id="currUser"></p>
+        <select id="available-users" class="form-control" style="margin-bottom: 2%;">
+          <option disabled selected>Choose user</option>
+        </select>
+        <div id="users-ul"></div>
+      </div>
+  
+      <div id="video-chat-container" class="video-position" style="width: 50%;">
+        <video id="local-video" autoplay="autoplay" muted="muted" style="width: 100%;"></video><br><br>
+        <video id="remote-video" autoplay="autoplay" style="width: 100%;"></video>
+      </div>
+      <input type="hidden" id="test" value="<%= jsonArr  %>" onclick="load();">
+    </div>
+
+    <div class="modal fade" id="myModal" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title"></h4>
+          </div>
+          <div class="modal-footer">            
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="answerBtn">Answer</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal" id="declineBtn">Decline</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        $( document ).ready(function() {
+            load();
+
+            $("#currUser").html("Logged in as: " + localStorage.getItem('loginUsername') + "<br>");
+            $('#available-users').on('change', function() {
+              localStorage.setItem('loginUsername', this.value);
+              localStorage.setItem('loginID', $(this).find('option:selected').attr("id"));
+              window.location.reload();
+            });
+        });
+
+        function load(){
+            var json = document.getElementById('test').value;
+            json = JSON.parse(json);
+
+            for(var i = 0; i < json.length; i++) {
+                var obj = json[i];
+                $("#available-users").append("<option value=" + obj.username + " id=" + obj.id + ">" + obj.username + "</option>");
+                $("#users-ul").append('<div class="row">'
+                                  + '    <div class="col-md-7 col-sm-7">'
+                                  + '      <h4>' + obj.username + '</h5>'
+                                  + '    </div>'
+                                  + '    <div class="col-md-4 col-sm-3">'
+                                  + '      <button onclick="startCall(' + obj.id + ')" class="btn btn-primary pull-right">CALL</a>'
+                                  // + '      <a href="/call/' + localStorage.getItem('loginUsername') + '/' + obj.id + '" class="btn btn-primary pull-right">CALL</a>'
+                                  + '    </div>'
+                                  + '    <div class="col-md-1 col-sm-2"></div>'
+                                  + '  </div><hr>');
+            }
+        }
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="client.js"></script>
+  </body>
+</html>
